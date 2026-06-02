@@ -47,9 +47,29 @@
         table th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; }
         table td { padding: 12px; border-bottom: 1px solid #eee; }
         
-        /* Gaya Tombol Aksi Baru */
-        .btn-edit { color: var(--blue); background: none; border: none; font-size: 16px; cursor: pointer; padding: 5px; }
-        .btn-delete { color: var(--danger); background: none; border: none; font-size: 16px; cursor: pointer; padding: 5px; margin-left: 8px; }
+        .btn-edit, .btn-delete { 
+    background: #f8f9fa; /* Beri background tipis agar terlihat seperti tombol */
+    border: 1px solid #eee; 
+    border-radius: 6px;
+    font-size: 14px; 
+    cursor: pointer; 
+    padding: 6px; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    min-width: 28px; /* Pastikan area klik tidak terlalu kecil */
+}
+
+.btn-edit { color: var(--blue); }
+.btn-delete { color: var(--danger); }
+
+/* Efek saat tombol ditekan */
+.btn-edit:active, .btn-delete:active { 
+    transform: scale(0.9); 
+    background: #e9ecef;
+}
+
 
 
         .category-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; margin-bottom: 20px; }
@@ -64,7 +84,11 @@
         .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: #aaa; }
         .close-modal:hover { color: var(--danger); }
-
+        table td:last-child {
+            white-space: nowrap; /* Kunci agar tidak tumpuk atas-bawah */
+            width: 1%; 
+            padding: 8px 5px;
+        }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -197,9 +221,9 @@
 
     const WALLETS = ["BCA", "BRI", "Dana", "Seabank", "Tunai", "E-Toll", "Pinjam/Hutang"];
     
-    const defaultIncome = ["Gaji Driver", "Buzzer", "Bulanan Wifi", "Uang Saku", "Bayar Hutang", "Lainnya"];
+    const defaultIncome = ["Gaji", "Sisa Bulan Kemaren", "Uang Saku", "Bayar Hutang", "Lainnya"];
     const defaultExpense = ["Makan", "Bulanan", "Hiburan", "Prabot", "Kesehatan", "Kendaraan", "Laundry", "Bensin", "Pinjamkan Uang", "Lainnya"];
-    const defaultBusiness = ["Kuota"];
+    const defaultBusiness = ["Jualan"];
 
     let customIncome = JSON.parse(localStorage.getItem('customIncomeCategories')) || defaultIncome;
     let customExpense = JSON.parse(localStorage.getItem('customExpenseCategories')) || defaultExpense;
@@ -404,7 +428,10 @@
                 
                 const idx = transactions.findIndex(x => x.id === t.id);
                 const d = new Date(t.date);
-                const formattedDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                const yy = String(d.getFullYear()).slice(-2); // Menghasilkan "26" dari 2026
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                const formattedDate = `${dd}/${mm}/${yy}`; // Menjadi 01/06/26
 
                 // Baris transfer diberikan tanda warna abu-abu kebiruan (var(--blue)) atau standar agar membedakan dari income/expense murni
                 let rowColor = t.category === 'Transfer' ? 'var(--blue)' : (t.type === 'income' ? 'green' : 'red');
@@ -412,7 +439,7 @@
 
                 tbody.innerHTML += `<tr>
                     <td><small>${formattedDate}</small></td>
-                    <td><b>${t.category}</b><br><small>${t.note}</small></td>
+                    <td><b>${t.category}</b> ${t.wallet}<br><small>${t.note}</small></td>
                     <td style="color:${t.type==='income'?'green':'red'}">
                         ${t.type==='income'?'+':'-'} ${t.amount.toLocaleString('id-ID')}
                     </td>
